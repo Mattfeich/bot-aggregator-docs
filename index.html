@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad:true});</script>
+<title>Карта логики: бот-агрегатор</title>
+<style>
+  :root {
+    --bg: #F6F7F5; --panel: #FFFFFF; --paper: #FDFDFA;
+    --ink: #1F2933; --muted: #5B6B7A; --line: #D9E0E3;
+    --accent: #2F7E8C; --accent-soft: #E3EEF0;
+    --ai: #B07A2A; --ai-soft: #F5EBDC;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101820; --panel: #1A242E; --paper: #F2F1EC;
+      --ink: #E6EBEE; --muted: #93A3B0; --line: #2A3742;
+      --accent: #4FB3C4; --accent-soft: #1E323A;
+      --ai: #D9A55A; --ai-soft: #33291A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101820; --panel: #1A242E; --paper: #F2F1EC;
+    --ink: #E6EBEE; --muted: #93A3B0; --line: #2A3742;
+    --accent: #4FB3C4; --accent-soft: #1E323A;
+    --ai: #D9A55A; --ai-soft: #33291A;
+  }
+  :root[data-theme="light"] {
+    --bg: #F6F7F5; --panel: #FFFFFF; --paper: #FDFDFA;
+    --ink: #1F2933; --muted: #5B6B7A; --line: #D9E0E3;
+    --accent: #2F7E8C; --accent-soft: #E3EEF0;
+    --ai: #B07A2A; --ai-soft: #F5EBDC;
+  }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 0 16px 64px;
+  }
+  main { max-width: 780px; margin: 0 auto; }
+  header { padding: 40px 0 8px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600;
+  }
+  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 8px; text-wrap: balance; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  nav a {
+    font-size: 13px; text-decoration: none; color: var(--accent);
+    background: var(--accent-soft); border-radius: 999px; padding: 5px 12px;
+  }
+  nav a:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 22px 18px; margin-top: 22px;
+  }
+  h2 { font-size: 20px; margin: 0 0 4px; }
+  .lede { color: var(--muted); font-size: 14.5px; margin: 0 0 14px; }
+  .diagram {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 8px; overflow-x: auto;
+  }
+  .diagram pre.mermaid { margin: 0; min-width: 560px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .dot.code { background: var(--accent); }
+  .dot.ai { background: var(--ai); }
+  p, li { max-width: 68ch; }
+  code {
+    font-family: var(--mono); font-size: 13.5px;
+    background: var(--accent-soft); border-radius: 5px; padding: 1px 6px;
+  }
+  .ai-note {
+    border-left: 3px solid var(--ai); background: var(--ai-soft);
+    border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 14.5px; margin: 14px 0 0;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  td code { white-space: nowrap; }
+  .tag { font-size: 12px; border-radius: 999px; padding: 2px 10px; font-weight: 600; }
+  .tag.done { color: var(--accent); background: var(--accent-soft); }
+  .tag.plan { color: var(--ai); background: var(--ai-soft); }
+  footer { color: var(--muted); font-size: 13px; margin-top: 28px; }
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">Бот-агрегатор фриланс-заказов</div>
+  <h1>Карта логики бота</h1>
+  <p class="sub">Все ветки поведения @freelance_talk_bot на одной странице. Обновляется вместе с кодом.</p>
+  <nav>
+    <a href="#flow">Путь заказа</a>
+    <a href="#filter">Настройка фильтра</a>
+    <a href="#card">Жизнь карточки</a>
+    <a href="#settings">Настройки</a>
+    <a href="#commands">Команды</a>
+    <a href="#roadmap">Что дальше</a>
+  </nav>
+  <div class="legend">
+    <span><span class="dot code"></span>делает код (бесплатно, мгновенно)</span>
+    <span><span class="dot ai"></span>делает ИИ (Claude)</span>
+  </div>
+</header>
+
+<section id="flow">
+  <h2>1. Путь заказа: от биржи до тебя</h2>
+  <p class="lede">Главный конвейер. Работает круглосуточно, опрос бирж каждые 5 минут.</p>
+  <div class="diagram">
+<pre class="mermaid">
+%%{init: {'theme':'neutral', 'flowchart': {'curve':'basis'}}}%%
+flowchart TD
+  A1["FL.ru (RSS)"] --> B
+  A2["Freelance.ru (HTML)"] --> B
+  A3["Kwork (JSON)"] --> B
+  A4["Weblancer — выключен,<br/>Cloudflare режет наш IP"] -.-> B
+  B["Поллер: опрос раз в 5 мин"] --> C{"Заказ уже в базе?"}
+  C -- "да" --> X1["Пропустить"]
+  C -- "нет, новый" --> D["Hard-фильтр:<br/>источники · бюджет · ключевые слова"]
+  D -- "не прошёл" --> X2["Отсев"]
+  D -- "прошёл" --> E["LLM-скоринг против твоего профиля:<br/>match · score 0–100 · причина"]
+  E -- "не подходит" --> X3["Отсев"]
+  E -- "подходит" --> F{"Режим доставки?"}
+  F -- "сразу (realtime)" --> G["Карточка в чат"]
+  F -- "по кнопке (on_demand)" --> H["В очередь"]
+  H --> I["Кнопка «Получить заказы»:<br/>5 / 10 / все, топ по score"]
+  I --> G
+  classDef ai fill:#F5EBDC,stroke:#B07A2A,color:#5C3D0F;
+  class E ai;
+</pre>
+  </div>
+  <p class="ai-note">Двухслойная экономика: hard-слой бесплатно отсекает очевидное, и только выжившие заказы идут в модель. Поэтому ключевые слова — «ворота»: заказ без единого совпадения до ИИ не доходит.</p>
+</section>
+
+<section id="filter">
+  <h2>2. Настройка умного фильтра</h2>
+  <p class="lede">Фильтр пишется своими словами. Профиль версионируется — каждое изменение можно откатить.</p>
+  <div class="diagram">
+<pre class="mermaid">
+%%{init: {'theme':'neutral', 'flowchart': {'curve':'basis'}}}%%
+flowchart TD
+  A["«Фильтр» / /filter"] --> B["Ты пишешь текст свободной формой"]
+  B --> C["LLM-разбор текста"]
+  C --> D["hard-часть: бюджет, источники,<br/>ключевые слова → основы + синонимы + англ."]
+  C --> E["soft-правила: твои формулировки как есть"]
+  C --> F{"Есть неоднозначности?"}
+  F -- "да" --> G["Уточняющие вопросы по одному<br/>(кнопки да / нет / свой ответ)"]
+  G --> F
+  F -- "нет" --> H["Резюме: «как я тебя понял»"]
+  H --> I{"Твоё решение"}
+  I -- "✅ Применить" --> J["Новая версия профиля в базе"]
+  I -- "✏️ Переформулировать" --> B
+  I -- "❌ Отмена" --> K["Ничего не меняется"]
+  classDef ai fill:#F5EBDC,stroke:#B07A2A,color:#5C3D0F;
+  class C,D,E,G ai;
+</pre>
+  </div>
+  <p class="ai-note">Ответы на уточняющие вопросы сохраняются внутри правила и учитываются при каждом скоринге — это часть «памяти» профиля о тебе.</p>
+</section>
+
+<section id="card">
+  <h2>3. Жизнь карточки заказа</h2>
+  <p class="lede">Каждое твоё решение записывается — история не теряется, даже если передумал.</p>
+  <div class="diagram">
+<pre class="mermaid">
+%%{init: {'theme':'neutral', 'flowchart': {'curve':'basis'}}}%%
+flowchart TD
+  Q["В очереди (queued)"] -- "выдана кнопкой<br/>или прилетела в realtime" --> D["Карточка в чате:<br/>✅ Одобрить · ❌ Отклонить · ссылка"]
+  Q -- "старше окна свежести" --> E["Протухла (expired)"]
+  D -- "✅" --> A["Одобрена: закреплена в чате,<br/>осталась кнопка «Всё-таки отклонить»"]
+  D -- "❌" --> R["Отклонена: пометка, кнопок нет"]
+  A -- "передумал" --> R2["Откреплена и отклонена"]
+  A --> FB["Фидбек в базу"]
+  R --> FB
+  R2 --> FB
+  FB -.-> P["Будущее: пересмотр профиля ИИ<br/>по накопленному фидбеку"]
+  classDef ai fill:#F5EBDC,stroke:#B07A2A,color:#5C3D0F;
+  classDef ghost stroke-dasharray:4 4,color:#8A7350;
+  class P ai;
+  class P ghost;
+</pre>
+  </div>
+</section>
+
+<section id="settings">
+  <h2>4. Настройки: режим и окно свежести</h2>
+  <p class="lede">Два переключателя в «⚙️ Настройки», оба влияют на конвейер из раздела 1.</p>
+  <div class="diagram">
+<pre class="mermaid">
+%%{init: {'theme':'neutral', 'flowchart': {'curve':'basis'}}}%%
+flowchart TD
+  S["⚙️ Настройки"] --> M{"Режим доставки"}
+  M -- "по кнопке" --> M1["Заказы копятся в очереди"]
+  M -- "сразу" --> M2["Каждый подходящий — сразу карточкой"]
+  S --> W{"Окно свежести:<br/>день · 3 дня · неделя · месяц"}
+  W -- "сузил" --> W1["Лишнее из очереди протухает"]
+  W -- "расширил" --> W2["Пересборка: база прогоняется<br/>через твои фильтры заново"]
+  W2 --> W3{"Режим и объём"}
+  W3 -- "сразу, найдено ≤10" --> W4["Прислать карточками"]
+  W3 -- "по кнопке или найдено >10" --> W5["В очередь + подсказка забрать кнопкой"]
+  classDef ai fill:#F5EBDC,stroke:#B07A2A,color:#5C3D0F;
+  class W2 ai;
+</pre>
+  </div>
+  <p class="ai-note">База копится с момента запуска бота (31.07.2026), поэтому окно «месяц» станет по-настоящему месячным по мере накопления архива — биржи наружу отдают только короткий хвост ленты.</p>
+</section>
+
+<section id="commands">
+  <h2>5. Команды и меню</h2>
+  <p class="lede">Всё продублировано кнопками меню; произвольный текст вне сценариев ведёт на справку.</p>
+  <table>
+    <tr><th>Команда</th><th>Кнопка</th><th>Что делает</th></tr>
+    <tr><td><code>/orders</code></td><td>📥 Получить заказы</td><td>Выдать порцию из очереди (5/10/все, лучшие первыми)</td></tr>
+    <tr><td><code>/filter</code></td><td>🎯 Фильтр</td><td>Настроить умный фильтр свободным текстом</td></tr>
+    <tr><td><code>/sources</code></td><td>🗂 Источники</td><td>Включить/выключить биржи</td></tr>
+    <tr><td><code>/settings</code></td><td>⚙️ Настройки</td><td>Режим доставки и окно свежести</td></tr>
+    <tr><td><code>/status</code></td><td>📊 Статус</td><td>Фильтры, источники, режим, размер очереди</td></tr>
+    <tr><td><code>/about</code></td><td>ℹ️ О боте</td><td>Инфо-страница со всеми функциями (Telegraph)</td></tr>
+    <tr><td><code>/help</code></td><td>❓ Помощь</td><td>Справка и список команд</td></tr>
+    <tr><td><code>/menu</code></td><td>—</td><td>Показать меню (после «⬇️ Скрыть меню»)</td></tr>
+    <tr><td><code>/cancel</code></td><td>—</td><td>Отменить текущий ввод фильтра</td></tr>
+  </table>
+</section>
+
+<section id="roadmap">
+  <h2>6. Что дальше</h2>
+  <table>
+    <tr><td><span class="tag done">работает</span></td><td>FL.ru, Freelance.ru, Kwork · умный фильтр с уточнениями и подтверждением · очередь и режимы · окно свежести · одобрение с закрепом · меню, справка, фолбэк · автозапуск (systemd)</td></tr>
+    <tr><td><span class="tag plan">в планах</span></td><td>Пересмотр профиля ИИ по фидбеку («дообучение») · пинг удовлетворённости раз в 1–2 недели · Weblancer через прокси · Freelancehunt (нужен API-токен) · Telegram-каналы заказов · подписки и лимиты · Postgres при росте</td></tr>
+  </table>
+</section>
+
+<footer>Источник: <code>docs/logic-map.html</code> в репо бота · обновляется при изменении логики · сгенерировано 31.07.2026</footer>
+</main>
+
+</html>
